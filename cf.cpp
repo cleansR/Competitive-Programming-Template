@@ -20,23 +20,41 @@ typedef long double ld;
 #define p(x) cout << x << '\n'
 #define MOD 1000000007
 #define otherMOD 998244353
+
+namespace sg {
+    typedef ll T;
+    T id = 0, t[2 * N]; 
+    // id is identity: 1 for mult, 0 for add, ll max for min, ll min for max
+    // Make sure N is >= siz of array
+    
+    T func(T a, T b) { return a+b; }
  
-void dfs(vector<ll> adj[], ll marked[], ll chosen[], ll curr, ll parent)
-{
-  marked[curr] = true;
-  if(chosen[parent]==false)
-  {
-    chosen[curr] = true;
-  }
-  else 
-  chosen[curr] = false;
-  for(ll i = 0; i <adj[curr].size(); i++)
-  {
-    if(!marked[adj[curr][i]])
-    {
-      dfs(adj, marked, chosen, adj[curr][i], curr);
+    void modify(ll p, T v) { //set value v at position p
+        for(t[p += N] = v; p /= 2;) t[p] = func(t[2 * p], t[2 * p + 1]);
     }
-  }
+ 
+    T query(ll l, ll r) { //query on interval [l, r)
+        T resl = id, resr = id;
+        for(l += N, r += N; l < r; l /= 2, r /= 2) {
+            if(l & 1) resl = func(resl, t[l++]);
+            if(r & 1) resr = func(t[--r], resr);
+        }
+        return func(resl, resr);
+    }
+ 
+    void print(ll n){
+ 
+    }
+}
+ 
+void dfs(map<ll, vector<ll>>& mp, ll curr, vector<ll>& visited)
+{
+    visited[curr] = true;
+    for(auto it: mp[curr]){
+        if(!visited[it]){
+          dfs(mp, it, visited);
+        }
+    }
 }
  
 bool isPrime(ll n)
@@ -50,39 +68,7 @@ bool isPrime(ll n)
   }
   return true;
 }
- 
-vector<ll> toBinary(ll num) // first index of vector is smallest bit
-{
-  vector<ll> ans;
-  ll p = 0;
-  while(pow(2, p)<num)
-    p++;
-  if(pow(2, p)!=num)
-    p--;
-  while(p>=0)
-  {
-    if(num>=pow(2, p))
-    {
-      num -= (ll)pow(2, p);
-      ans.push_back(1);
-    }
-    else
-    ans.push_back(0);
-    p--;
-  }
- 
-  ll left = 0; ll right = ans.size()-1;
-  while(left<right)
-  {
-    ll temp = ans[left];
-    ans[left] = ans[right];
-    ans[right] = temp; 
-    left++;
-    right--;
-  }
-  return ans;  
-}
- 
+
 bool isPalindrome(string s)
 {
   ll l = 0; ll r = s.length(); r--;
@@ -96,30 +82,12 @@ bool isPalindrome(string s)
   }
   return true;
 }
- 
-bool isSubstring(string mainS, string subS)
-{
-  if (mainS.find(subS) != string::npos) 
-  {
-    return true;
-    } 
-  return false;
- 
-}
- 
+
 bool works()
 {
  return false;
 }
- 
-void readArr(ll arr[], ll size)
-{
-  for(ll i = 0; i < size; i++)
-  {
-    cin >> arr[i];
-  }
-}
- 
+
 vector<ll> prefixSumA(ll arr[], ll size)
 {
   vector<ll> pF;
@@ -141,20 +109,7 @@ vector<ll> prefixSumV(vector<ll>& v)
   }
   return pF;
 }
- 
-ll binToLL(ll arr[], ll size)
-{
-  ll ans = 0;
-  for(ll i = 0; i < 32; i++)
-  {
-    if(arr[i]==1)
-    {
-      ans+= (ll) pow(2, i);
-    }
-  }
-  return ans;
-}
- 
+
 void treeDFS(vector<ll> adj[], ll curr, ll parent)
 {
   vector<ll> temp = adj[curr];
@@ -164,47 +119,7 @@ void treeDFS(vector<ll> adj[], ll curr, ll parent)
     treeDFS(adj, temp[i], curr);
   }
 }
- 
-void printArray(ll arr[], ll size)
-{
-  forI(0, size, 1){
-    cout << arr[i] << " ";
-  }
-  cout << '\n';
-}
- 
-void printVector(vector<ll>& v)
-{
-  forI(0, v.size(), 1){
-    cout << v[i] << " ";
-  }
-  cout << '\n';
-}
- 
-void printSet(set<ll>& s)
-{
-  for(auto ptr = s.begin(); ptr!=s.end(); ptr++)
-  {
-    cout << (*ptr) << " ";
-  }
-  cout << '\n';
-}
- 
-void printMap(map<ll,ll>& mp)
-{
-  for (const auto &item: mp)
-  {
-    cout << item.first << " " << item.second << '\n';
-  }
-  cout << '\n';
-}
- 
-void tf(bool b)
-{
-  if(b) cout << "YES" << '\n';
-  else cout << "NO" << '\n';
-}
- 
+
 bool sortbyCond(const pair<pair<ll,ll>, vector<ll>>& a, const pair<pair<ll,ll>, vector<ll>>& b)
 {
     if (a.first.first != b.first.first)
@@ -267,25 +182,7 @@ ll gcd(ll a, ll b)
  
 ll lcm(ll a, ll b)
 { return a*b/gcd(a,b); }
- 
-bool validparentheses(string s)
-{
-  stack<char> st; ll n = s.length();
-  forI(0, n, 1)
-  {
-    if(s[i]=='(') st.push(s[i]);
-    else
-    {
-      if(st.size()==0)
-        return false;
-      else
-        st.pop();
-    }
-  }
-    if(st.size()==0)
-    return true; else return false;
-}
- 
+
 map<ll,ll> primeFac(ll x)
 {
   map<ll,ll> mp; 
@@ -312,22 +209,5 @@ map<ll,ll> primeFac(ll x)
     if(x>2) mp[x]++;
    
     return mp;
-  }
-}
- 
-void deez_nuts()
-{
-  
-}
-
-int main()
-{
-                    ios::sync_with_stdio(false);
-                cin.tie(NULL);
-            ll sus = 1;
-        cin >> sus;
-  for(ll amogus = 0; amogus < sus; amogus++)
-  { 
-    deez_nuts();
   }
 }
