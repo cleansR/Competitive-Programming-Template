@@ -19,7 +19,7 @@ typedef long double ld;
 #define otherMOD 998244353
 
 #define L 20
-
+ 
 // Segtree
 struct segtree{
     typedef ll T; //replace this
@@ -152,6 +152,35 @@ class lztree{
     }
 };
 
+// Union find
+
+ll id[N], sz[N];
+
+void setUp(ll siz)
+{
+    f(i, 0, siz, 1){
+        id[i] = i; sz[i] = 1;
+    }
+}
+
+ll find(ll v) {
+    if (v == id[v])
+        return v;
+    return id[v] = find(id[v]);
+}
+
+void merge(ll u, ll v) {
+    ll a = find(u);
+    ll b = find(v);
+    if (a != b) {
+        if (sz[a] < sz[b])
+            swap(a, b);
+        id[b] = a;
+        sz[a] += sz[b];
+    }
+}
+
+
 //Bsearch
 bool works()
 {
@@ -182,7 +211,19 @@ ll bs(ll l, ll r, bool goodbad)
     return r;
   }
 }
- 
+
+
+// Custom comparator
+
+struct cmp{
+    bool operator() (pair<ll, ll> a, pair<ll, ll> b) const{
+        if(a.first < b.first) return true;
+        else if(a.first > b.first) return false;
+        else{
+            return a.second > b.second;
+        }
+    }
+};
 
 
 //Combinatorics
