@@ -152,7 +152,7 @@ class lztree{
     }
 };
 
-// Union find
+// DSU
 
 ll id[N], sz[N];
 
@@ -214,8 +214,8 @@ ll bs(ll l, ll r, bool goodbad)
 
 
 // Custom comparator
-
 struct cmp{
+    // Return TRUE if a should be popped after b
     bool operator() (pair<ll, ll> a, pair<ll, ll> b) const{
         if(a.first < b.first) return true;
         else if(a.first > b.first) return false;
@@ -228,7 +228,10 @@ struct cmp{
 
 //Combinatorics
 
-ll inv(ll a, ll b){return 1<a?b - inv(b%a,a)*b/a : 1;}
+ll inv(ll a, ll b)
+{
+    return 1<a?b - inv(b%a,a)*b/a : 1;
+}
  
 vector<ll> fact(ll n) // MOD MOD
 {
@@ -266,23 +269,105 @@ ll lcm(ll a, ll b)
 
 map<ll,ll> primeFac(ll x)
 {
-  map<ll,ll> mp; 
-  if(x==0 || x==1) return mp;
-  else
-  {
-    while(x%2==0)
+    map<ll,ll> mp; 
+    if(x==0 || x==1) return mp;
+    else
     {
-      x/=2; mp[2]++;
+        while(x%2==0)
+        {
+        x/=2; mp[2]++;
+        }
+        for(ll i = 3; i <= sqrt(x); i = i+2) 
+        { 
+        while (x%i==0) 
+        {
+            mp[i]++;
+            x = x/i; 
+        } 
+        } 
+        if(x>2) mp[x]++;
+        return mp;
     }
-    for(ll i = 3; i <= sqrt(x); i = i+2) 
-    { 
-      while (x%i==0) 
-      {
-        mp[i]++;
-        x = x/i; 
-      } 
-    } 
-    if(x>2) mp[x]++;
-    return mp;
-  }
 }
+
+
+// 2D prefix sums
+
+// The parameters are the subrectangle of the original array!
+ll access2dPFS(vector<vector<ll>>& pfs, ll sr, ll br, ll sc, ll bc)
+{
+    return pfs[br+1][bc+1] - pfs[br+1][sc] - pfs[sr][bc+1] + pfs[sr][sc];
+}
+
+vector<vector<ll>> create2dPFS(vector<vector<ll>>& v)
+{
+    ll n = v.size(); ll m = v[0].size();
+    vector<vector<ll>> pfs(n+1, vector<ll>(m+1, 0)); pfs[1][1] = v[0][0];
+    f(i, 1, n+1, 1){
+        f(j, 1, m+1, 1){
+            pfs[i][j] = v[i-1][j-1] + pfs[i-1][j] + pfs[i][j-1] - pfs[i-1][j-1];
+        }
+    }
+}
+
+
+// Graph
+
+void dfs(vector<ll> adj[], ll curr, vector<bool>& visited)
+{
+    visited[curr] = true; 
+    for(auto it: adj[curr]){
+        if(!visited[it]) dfs(adj, it, visited);
+    }
+}
+
+void bfs(vector<ll> adj[], ll src, vector<ll>& dist)
+{
+    queue<ll> q; q.push(src); dist[src] = 0;
+    while(q.size() > 0){
+        ll v = q.front(); q.pop();
+        for(auto it: adj[v]){
+            if(dist[v] == -1){
+                q.push(it); dist[it] = dist[v] + 1;
+            }
+        }
+    }
+}
+
+/*
+    Returns a pair {{end1, end2}, dist}
+    Assumes adj is 1 indexed (should work if 0 indexed also)
+*/
+pair<pair<ll, ll>, ll> diameter(vector<ll> adj[], ll n)
+{
+    ll end1, end2, dist;
+    ll start = 1; vector<ll> distFromStart(n+1, -1);
+    bfs(adj, start, distFromStart);
+
+    ll mx = 0; ll furthestNode;
+    f(i, 0, distFromStart.size(), 1){
+        if(distFromStart[i] > mx){
+            mx = distFromStart[i];
+            furthestNode = i;
+        }
+    }
+    
+    end1 = furthestNode;
+
+    vector<ll> distFromFurthest(n+1, -1);
+    bfs(adj, furthestNode, distFromFurthest);
+    mx = 0; 
+    f(i, 0, distFromFurthest.size(), 1){
+        if(distFromFurthest[i] > mx){
+            mx = distFromFurthest[i];
+            furthestNode = i;
+        }
+    }
+
+    end2 = furthestNode;
+
+    dist = mx;
+
+    return {{end1, end2}, dist};
+}
+
